@@ -1,9 +1,9 @@
 import { IsNumber, IsDate } from 'class-validator';
 
 export class RecordCheckInDto {
-  @IsNumber({}, { message: 'employeeId must be a number' })
-  employeeId: number;
+  @IsNumber({}, { message: 'employee_id must be a number' })
+  employee_id: number;
 
-  @IsDate({ message: 'checkInTime must be a valid date object' })
-  checkInTime: Date;
+  @IsDate({ message: 'check_in_time must be a valid date object' })
+  check_in_time: Date;
 }
