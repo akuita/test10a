@@ -4,9 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany
+  OneToMany,
+  JoinColumn
 } from 'typeorm';
 import { AttendanceRecord } from './attendance_records';
+import { UiComponent } from './ui_components';
 
 @Entity('employees')
 export class Employee {
@@ -26,8 +28,13 @@ export class Employee {
   role: string;
 
   @Column()
-  login_status: boolean;
+  @OneToMany(type => AttendanceRecord, attendanceRecord => attendanceRecord.employee, {
+    cascade: true
+  })
+  @JoinColumn({ name: 'employee_id' })
 
+
+  // Relation with UiComponent is not specified in the ERD, hence not included here.
   @OneToMany(() => AttendanceRecord, attendanceRecord => attendanceRecord.employee)
   attendance_records: AttendanceRecord[];
 }

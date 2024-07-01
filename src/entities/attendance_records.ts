@@ -1,6 +1,6 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn, BaseEntity,
   Column,
   ManyToOne,
   JoinColumn,
@@ -8,16 +8,17 @@ import {
   UpdateDateColumn
 } from 'typeorm';
 import { Employee } from './employee';
+import { UiComponent } from './ui_components';
 
 @Entity('attendance_records')
-export class AttendanceRecord {
+export class AttendanceRecord extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
   updated_at: Date;
 
   @Column({ type: 'timestamp' })
@@ -25,7 +26,7 @@ export class AttendanceRecord {
 
   @Column({ type: 'timestamp', nullable: true })
   check_out_time: Date;
-
+  @Column({ type: 'enum', enum: ['checked_in', 'checked_out'] })
   @Column({ type: 'varchar' })
   status: string;
 
@@ -36,6 +37,6 @@ export class AttendanceRecord {
   employee_id: number;
 
   @ManyToOne(() => Employee, employee => employee.attendance_records)
-  @JoinColumn({ name: 'employee_id' })
+  employee: Employee;
   employee: Employee;
 }
