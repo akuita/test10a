@@ -1,15 +1,15 @@
-import { IsNotEmpty, IsDate } from 'class-validator';
+import { IsNotEmpty, IsDate, IsInt, IsISO8601 } from 'class-validator';
 
 export class RecordCheckInDto {
   @IsNotEmpty()
-  @IsDate()
+  @IsInt()
   employeeId: number;
 
   @IsNotEmpty()
-  @IsDate()
-  checkInTime: Date;
+  @IsISO8601()
+  checkInTime: string;
 
   @IsNotEmpty()
-  @IsDate()
-  date: Date;
+  @IsISO8601()
+  date: string;
 }
