@@ -1,17 +1,44 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { AttendanceRecordRepository } from 'path/to/attendance-record.repository'; // Replace with the actual path
-import { AttendanceRecord } from 'src/entities/attendance_records';
-import * as dayjs from 'dayjs';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AttendanceRecord } from '../../entities/attendance_records';
+import { BaseRepository, QueryCondition, QueryOperators, QueryWhereType } from '../../shared/base.repository';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private readonly attendanceRecordRepository: AttendanceRecordRepository) {}
+  constructor(
+    @InjectRepository(AttendanceRecord)
+    private readonly attendanceRecordRepository: BaseRepository<AttendanceRecord>,
+  ) {}
 
-  async checkEmployeeCheckIn(employeeId: number, date: Date): Promise<void> {
-    const mostRecentEntry = await this.attendanceRecordRepository.findMostRecentCheckIn(employeeId);
-    if (mostRecentEntry && dayjs(mostRecentEntry.date).isSame(dayjs(date), 'day')) {
-      throw new BadRequestException('Employee has already checked in for the day.');
+  async checkInActivation(employeeId: number, date: Date): Promise<{ activateCheckout: boolean }> {
+    try {
+      const conditions: QueryCondition[] = [
+        {
+          column: 'employee_id',
+          value: employeeId,
+          operator: QueryOperators.EQUAL,
+          whereType: QueryWhereType.WHERE_AND,
+        },
+        {
+          column: 'date',
+          value: date,
+          operator: QueryOperators.EQUAL,
+          whereType: QueryWhereType.WHERE_AND,
+        },
+        {
+          column: 'check_in_time',
+          value: null,
+          operator: QueryOperators.NOT_EQUAL,
+          whereType: QueryWhereType.WHERE_AND,
+        },
+      ];
+
+      const attendanceRecord = await this.attendanceRecordRepository.getOne({ conditions });
+
+      return { activateCheckout: !!attendanceRecord };
+    } catch (error) {
+      // If no record is found or any other error occurs, we assume the check-in hasn't happened
+      return { activateCheckout: false };
     }
-    // If dates are different, do nothing (allow the check-in process to continue)
   }
 }
